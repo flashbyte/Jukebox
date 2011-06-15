@@ -3,4 +3,14 @@ PORT = '6600'
 
 MUSIK_DIR='/home/flashbyte/Musik/Alben'
 
-THUMB_SIZE=(280,280)
+#SCREEN_SIZE=(800,600)
+SCREEN_SIZE=(1366,768)
+#FULLSCREEN=False
+FULLSCREEN=True
+
+THUMB_SIZE=(320,320)
+
+
+yel=(247,244,55)
+red=(157,4,6)
+darkblue=(10,24,146)
