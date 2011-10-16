@@ -14,7 +14,8 @@ class PlayScreen:
         self.makeTitle(mpc.nowPlaying['artist'],mpc.nowPlaying['title'])
         self.makeCover(mpc.getCover())
         self.makeMirror(mpc.getCover())
-        self.makeTimeline(500,20,0)
+        self.makeTimeline(500,20,(0,100))
+        self.makePlaylist(self.mpc.playlist)
         self.blitScreen()
     
     def update(self):
@@ -23,7 +24,8 @@ class PlayScreen:
         self.makeMirror(self.mpc.getCover())
             #Timeline
         tmp = self.mpc.getTime().split(':')
-        self.makeTimeline(500,20,int(int(tmp[0])/float(int(tmp[1]))*100))
+        self.makeTimeline(500,20,(int(tmp[0]),int(tmp[1])))
+        self.makePlaylist(self.mpc.playlist)
         self.blitScreen()
         
     def blitScreen(self):
@@ -38,7 +40,8 @@ class PlayScreen:
         x = int(self.screen.get_width()/3.0*2 - self.title.get_width() / 2)
         self.screen.blit(self.title,(x,100))
 
-    
+        self.screen.blit(self.playlist,(600,500))
+
     def makeCover(self,img):
         cover=pygame.image.load(img)
         cover=pygame.transform.scale(cover,THUMB_SIZE)
@@ -97,7 +100,9 @@ class PlayScreen:
         
         self.mirror=ret
 
-    def makeTimeline(self,width,height,pro):
+    def makeTimeline(self,width,height,t):
+        time=self.myfont.render(str(t[0])+':'+str(t[1]),2,yel)
+        pro = int(int(t[0])/float(int(t[1]))*100)
         ret = pygame.Surface((width,height),0,32)
     #Math foo
         steps=width
@@ -122,7 +127,13 @@ class PlayScreen:
         pro=float(pro)/100
         pygame.draw.rect(ret,darkblue,Rect((4,4),((width-8)*pro,height-8)))
 
-        self.timeL = ret
+        tmp = pygame.Surface((max(ret.get_width(),time.get_width()),ret.get_height()+time.get_height()+10),pygame.SRCALPHA,32)
+        x = tmp.get_width()/2-time.get_width()/2
+        tmp.blit(time,(x,0))
+        x = tmp.get_width()/2-ret.get_width()/2
+        tmp.blit(ret,(x,time.get_height()+10))
+
+        self.timeL = tmp
 
     def makeTitle(self,title,artist):
         title=self.myfont.render("Title: "+title,2,yel)
@@ -158,7 +169,27 @@ class PlayScreen:
         self.bg = ret
 
 
+    def makePlaylist(self,pl):
+        i = 0
+        maxi = min(30,len(pl))
+        tmp=[]
+        while i < maxi:
+            tmp.append(self.myfont.render(pl[i],2,yel))
+            i += 1
+        width = []
+        height = []
+        for i in tmp:
+            width.append(i.get_width())
+            height.append(i.get_height())
+        width = max(width)
+        height = sum(height)
 
+        tmpS = pygame.Surface((width,height),pygame.SRCALPHA,32)
 
-
-
+        i = 0
+        y = 0
+        while i < len(tmp):
+            tmpS.blit(tmp[i],(0,y))
+            y += tmp[i].get_height()
+            i += 1
+        self.playlist = tmpS
