@@ -6,7 +6,7 @@ from pygame.locals import *
 class PlayScreen:
 
     def __init__(self,mpc):
-        self.myfont=pygame.font.Font(pygame.font.match_font('timesnewroman',italic=True),40)
+        self.myfont=pygame.font.Font(pygame.font.match_font('freeserif'),30)
         self.mpc = mpc
         self.screen = pygame.Surface(SCREEN_SIZE,0,32)
 
@@ -26,7 +26,7 @@ class PlayScreen:
         tmp = self.mpc.getTime().split(':')
         self.makeTimeline(500,20,(int(tmp[0]),int(tmp[1])))
         self.makePlaylist(self.mpc.playlist)
-        self.blitScreen()
+        self.blitScreen
         
     def blitScreen(self):
         self.screen.blit(self.bg,(0,0))            
@@ -62,7 +62,12 @@ class PlayScreen:
         ret.blit(cover,(4,4))            
         self.img = ret
 
-    
+    def blendOut(self,img):
+        height = img.get_height()
+        grad = 255 / height
+        for rows in range(height):
+            sub = img.subsurface(pygame.Rect((0,rows),(img.get_width(),1)))
+            sub.set_alpha(255-(grad*rows))
 
     def makeMirror(self,img):
         cover=pygame.image.load(img)
@@ -98,10 +103,11 @@ class PlayScreen:
     #    lines += 1
     #ret = tmpPic
         
+        self.blendOut(ret)
         self.mirror=ret
 
     def makeTimeline(self,width,height,t):
-        time=self.myfont.render(str(t[0])+':'+str(t[1]),2,yel)
+        time=self.myfont.render(str(t[0])+':'+str(t[1]),2,white)
         pro = int(int(t[0])/float(int(t[1]))*100)
         ret = pygame.Surface((width,height),0,32)
     #Math foo
@@ -136,8 +142,8 @@ class PlayScreen:
         self.timeL = tmp
 
     def makeTitle(self,title,artist):
-        title=self.myfont.render("Title: "+title,2,yel)
-        artist=self.myfont.render("Artist: "+artist,2,yel)
+        title=self.myfont.render("Title: "+title,2,white)
+        artist=self.myfont.render("Artist: "+artist,2,white)
         width=0
         if title.get_width()>artist.get_width():
             width = title.get_width()
@@ -174,7 +180,7 @@ class PlayScreen:
         maxi = min(30,len(pl))
         tmp=[]
         while i < maxi:
-            tmp.append(self.myfont.render(pl[i],2,yel))
+            tmp.append(self.myfont.render(pl[i],2,white))
             i += 1
         width = []
         height = []
