@@ -26,7 +26,7 @@ class PlayScreen:
         tmp = self.mpc.getTime().split(':')
         self.makeTimeline(500,20,(int(tmp[0]),int(tmp[1])))
         self.makePlaylist(self.mpc.playlist)
-        self.blitScreen
+        self.blitScreen()
         
     def blitScreen(self):
         self.screen.blit(self.bg,(0,0))            
@@ -58,41 +58,51 @@ class PlayScreen:
             color=(color[0]%255,color[1]%255,color[2]%255)
             pygame.draw.line(ret,color,(0,i),(ret.get_width(),i))
             i+=1
-    #Draw Image
+        #Draw Image
         ret.blit(cover,(4,4))            
         self.img = ret
 
     def blendOut(self,img):
         height = img.get_height()
-        grad = 255 / height
-        for rows in range(height):
-            sub = img.subsurface(pygame.Rect((0,rows),(img.get_width(),1)))
-            sub.set_alpha(255-(grad*rows))
+        grad = 255.0 / height
+        for row in range(height):
+            for col in range(img.get_width()):
+                color = img.get_at((col,row))
+                color.a = int(255-(grad*row))
+                img.set_at((col,row), color)
+
+#            sub.set_alpha(255-(grad*rows))
 
     def makeMirror(self,img):
+        
         cover=pygame.image.load(img)
         cover=pygame.transform.scale(cover,THUMB_SIZE)
-    # Math foo
+        cover=pygame.transform.flip(cover,False,True)
+
+        tmp = pygame.Surface((cover.get_width(),cover.get_height()),pygame.SRCALPHA,32)
+        tmp.blit(cover,(0,0))
+
+        self.blendOut(tmp)
+        
+        # Math foo
         width=cover.get_height()+cover.get_width()
-    
-    #Mirror
         ret = pygame.Surface((width,cover.get_height()),pygame.SRCALPHA,32)
-        cover = pygame.transform.flip(cover,False,True)
-    #ret.set_alpha(0)
-        ret.blit(cover,(0,0))
+        ret.set_alpha(0)
+        ret.blit(tmp,(0,0))
     
-    # Shift
-        tmpPic = pygame.Surface((width,cover.get_height()),pygame.SRCALPHA,32)
+        # Shift
         div = 0
-        for lines in range(ret.get_height()):
+        for line in range(ret.get_height()):
             tmp = range(ret.get_width())
             tmp.reverse()
             for i in tmp:
-                tmpPic.set_at((i+div,lines),ret.get_at((i,lines)))
-            if (lines%2)!=0:
+                ret.set_at((i+div,line),ret.get_at((i,line)))
+                ret.set_at((i,line),pygame.Color(0,0,0,0))
+            if (line%2)!=0:
                 div+=1  
                    
-        ret = tmpPic 
+        self.mirror=ret
+         
     # Transparacy
     #tmpPic = pygame.Surface((width,cover.get_height()),pygame.SRCALPHA,32)
     #lines = 1
@@ -103,8 +113,6 @@ class PlayScreen:
     #    lines += 1
     #ret = tmpPic
         
-        self.blendOut(ret)
-        self.mirror=ret
 
     def makeTimeline(self,width,height,t):
         time=self.myfont.render(str(t[0])+':'+str(t[1]),2,white)
